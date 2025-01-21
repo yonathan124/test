@@ -120,7 +120,6 @@
             overflow-x: auto;
         }
 
-        /* Responsive : ajustement des boutons sur les petits écrans */
         @media (max-width: 768px) {
             nav a {
                 display: block;
@@ -128,23 +127,21 @@
             }
 
             button {
-                width: 100%; /* Les boutons prendront toute la largeur disponible */
+                width: 100%;
                 margin-top: 1rem;
-                padding: 0.5rem 1rem; /* Réduire un peu la hauteur du bouton */
-                font-size: 1rem; /* Réduire légèrement la taille de la police */
+                padding: 0.5rem 1rem;
+                font-size: 1rem;
             }
 
-            /* Espacer davantage les boutons dans le conteneur */
             .button-container {
                 flex-direction: column;
                 align-items: center;
-                gap: 1rem; /* Ajouter plus d'espace entre les boutons */
+                gap: 1rem;
             }
 
-            /* Ajuster les boutons 'Effacer' et 'Supprimer' pour plus de confort */
             .delete-btn {
                 margin-top: 0.5rem;
-                padding: 0.4rem 0.8rem; /* Réduire le padding pour les boutons de suppression */
+                padding: 0.4rem 0.8rem;
             }
         }
     </style>
@@ -186,11 +183,10 @@
     <footer>
         <p>&copy; 2025 GLAD GYM NUTRITION. Tous droits réservés.</p>
     </footer>
+    <script type="module">
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+        import { getDatabase, ref, set, get, child, remove } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
 
-    <!-- Inclusion des scripts Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
-    <script>
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCBnNFvk5-VDdHGgmr-x32da41mIIijNY0",
@@ -203,134 +199,84 @@
             measurementId: "G-P4W3BNF3W4"
         };
 
-        // Initialisation Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        document.addEventListener('DOMContentLoaded', () => {
+        // Fonction pour récupérer les ventes depuis Firebase
+        const loadSales = async () => {
+            const dbRef = ref(db, 'sales/');
+            const snapshot = await get(dbRef);
+            if (snapshot.exists()) {
+                return snapshot.val();
+            } else {
+                console.log("Aucune donnée trouvée.");
+                return {};
+            }
+        };
+
+        // Fonction pour sauvegarder une vente dans Firebase
+        const saveSale = (saleId, saleData) => {
+            set(ref(db, 'sales/' + saleId), saleData).then(() => {
+                console.log("Vente ajoutée avec succès !");
+            }).catch((error) => {
+                console.error("Erreur lors de l'ajout de la vente :", error);
+            });
+        };
+
+        // Fonction pour supprimer une vente
+        const deleteSale = (saleId) => {
+            remove(ref(db, 'sales/' + saleId)).then(() => {
+                console.log("Vente supprimée avec succès !");
+            }).catch((error) => {
+                console.error("Erreur lors de la suppression de la vente :", error);
+            });
+        };
+
+        // Fonction pour afficher les ventes dans le tableau
+        const renderSales = (sales) => {
             const salesTable = document.getElementById('salesTable');
-            const clearDataButton = document.getElementById('clearData');
+            salesTable.innerHTML = '';
 
-            // Fonction pour charger les ventes depuis Firebase
-            const loadOrders = () => {
-                const ordersRef = db.ref('sales');
-                return ordersRef.once('value').then((snapshot) => {
-                    const orders = snapshot.val();
-                    return orders ? Object.values(orders) : [];
-                });
-            };
-
-            // Fonction pour sauvegarder les commandes dans Firebase
-            const saveOrders = (orders) => {
-                const ordersRef = db.ref('sales');
-                ordersRef.set(orders);
-            };
-
-            // Fonction pour regrouper les commandes par date, client et téléphone
-            const groupOrders = (orders) => {
-                const groupedOrders = [];
-
-                orders.forEach(order => {
-                    const existingOrder = groupedOrders.find(o =>
-                        new Date(o.date).toLocaleDateString() === new Date(order.date).toLocaleDateString() &&
-                        o.client === order.client &&
-                        o.phone === order.phone
-                    );
-
-                    if (existingOrder) {
-                        const existingProduct = existingOrder.products.find(p => p.name === order.product);
-                        if (existingProduct) {
-                            existingProduct.quantity += order.quantity;
-                        } else {
-                            existingOrder.products.push({ name: order.product, quantity: order.quantity });
-                        }
-                        existingOrder.totalPrice += order.totalPrice;
-                    } else {
-                        groupedOrders.push({
-                            date: order.date,
-                            client: order.client,
-                            phone: order.phone,
-                            products: [{ name: order.product, quantity: order.quantity }],
-                            totalPrice: order.totalPrice
-                        });
-                    }
-                });
-
-                groupedOrders.forEach(order => {
-                    const productDetails = order.products.map(p => `${p.name} (${p.quantity})`).join(", ");
-                    order.product = productDetails;
-                    order.quantity = order.products.reduce((total, p) => total + p.quantity, 0);
-                });
-
-                return groupedOrders;
-            };
-
-            // Fonction pour afficher les commandes dans le tableau
-            const renderOrders = (orders) => {
-                salesTable.innerHTML = '';
-                orders.forEach((order, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(order.date).toLocaleDateString()}</td>
-                        <td>${order.client}</td>
-                        <td>${order.phone || 'Non renseigné'}</td>
-                        <td>${order.product}</td>
-                        <td>${order.quantity}</td>
-                        <td>${(order.totalPrice / order.quantity).toFixed(2)} FCFA</td>
-                        <td>${order.totalPrice} FCFA</td>
-                        <td><button class="delete-btn" data-index="${index}">Supprimer</button></td>
-                    `;
-                    salesTable.appendChild(row);
-                });
-
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', (event) => {
-                        const index = event.target.getAttribute('data-index');
-                        deleteOrder(index);
-                    });
-                });
-            };
-
-            // Fonction pour supprimer une commande
-            const deleteOrder = (index) => {
-                loadOrders().then((orders) => {
-                    orders.splice(index, 1);
-                    saveOrders(orders);
-                    renderOrders(groupOrders(orders));
-                });
-            };
-
-            // Fonction pour vider toutes les données
-            clearDataButton.addEventListener('click', () => {
-                if (confirm('Voulez-vous vraiment effacer toutes les données des ventes ?')) {
-                    db.ref('sales').remove();
-                    renderOrders([]);
-                }
+            Object.keys(sales).forEach((saleId) => {
+                const sale = sales[saleId];
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${new Date(sale.date).toLocaleDateString()}</td>
+                    <td>${sale.client}</td>
+                    <td>${sale.phone || 'Non renseigné'}</td>
+                    <td>${sale.product}</td>
+                    <td>${sale.quantity}</td>
+                    <td>${(sale.totalPrice / sale.quantity).toFixed(2)} FCFA</td>
+                    <td>${sale.totalPrice} FCFA</td>
+                    <td><button class="delete-btn" data-id="${saleId}">Supprimer</button></td>
+                `;
+                salesTable.appendChild(row);
             });
 
-            // Fonction de tri
-            const sortOrders = (orders, sortBy, isDescending) => {
-                return orders.sort((a, b) => {
-                    if (sortBy === 'date') {
-                        const dateA = new Date(a.date);
-                        const dateB = new Date(b.date);
-                        return isDescending ? dateB - dateA : dateA - dateB;
-                    }
-                    if (sortBy === 'quantity' || sortBy === 'totalPrice') {
-                        return isDescending ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy];
-                    }
-                    if (sortBy === 'client' || sortBy === 'phone') {
-                        return isDescending ? b[sortBy].localeCompare(a[sortBy]) : a[sortBy].localeCompare(b[sortBy]);
-                    }
-                    return 0;
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', (event) => {
+                    const saleId = event.target.getAttribute('data-id');
+                    deleteSale(saleId);
                 });
-            };
-
-            // Charger et afficher les commandes
-            loadOrders().then((orders) => {
-                const groupedOrders = groupOrders(orders);
-                renderOrders(groupedOrders);
             });
+        };
+
+        // Fonction pour effacer toutes les ventes
+        const clearDataButton = document.getElementById('clearData');
+        clearDataButton.addEventListener('click', async () => {
+            if (confirm('Voulez-vous vraiment effacer toutes les données des ventes ?')) {
+                const sales = await loadSales();
+                Object.keys(sales).forEach(saleId => {
+                    deleteSale(saleId);
+                });
+                renderSales({});
+            }
+        });
+
+        // Charger et afficher les ventes
+        loadSales().then((sales) => {
+            renderSales(sales);
         });
     </script>
 </body>
