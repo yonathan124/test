@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test Firebase</title>
+    <title>Ventes</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -12,15 +12,37 @@
             background-color: #333;
             color: #fff;
         }
+
         header {
             background-color: #ff0000;
+            color: white;
             text-align: center;
             padding: 1rem 0;
         }
-        main {
-            padding: 2rem;
+
+        nav {
+            background-color: black;
+            padding: 0.5rem;
             text-align: center;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
         }
+
+        nav a {
+            color: white;
+            margin: 0 1.5rem;
+            text-decoration: none;
+            font-weight: bold;
+            padding: 0.5rem 1rem;
+            transition: background-color 0.3s ease;
+        }
+
+        nav a:hover {
+            text-decoration: underline;
+            background-color: #ff4444;
+        }
+
         footer {
             background-color: black;
             color: white;
@@ -28,25 +50,147 @@
             padding: 1rem 0;
             margin-top: 2rem;
         }
+
+        main {
+            padding: 2rem;
+        }
+
+        h2 {
+            margin-bottom: 1rem;
+        }
+
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 1.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 0.5rem 1rem;
+            background-color: #ff0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            text-align: center;
+            font-weight: bold;
+            width: 200px;
+            max-width: 100%;
+        }
+
+        button:hover {
+            background-color: #cc0000;
+        }
+
+        .delete-btn {
+            background-color: #cc0000;
+            color: white;
+            border: none;
+            cursor: pointer;
+            padding: 0.3rem 0.5rem;
+        }
+
+        .delete-btn:hover {
+            background-color: #990000;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+            overflow-x: auto;
+        }
+
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+
+        th, td {
+            padding: 0.5rem;
+            text-align: left;
+        }
+
+        th {
+            cursor: pointer;
+            background-color: #444;
+        }
+
+        .table-container {
+            overflow-x: auto;
+        }
+
+        /* Responsive : ajustement des boutons sur les petits écrans */
+        @media (max-width: 768px) {
+            nav a {
+                display: block;
+                margin: 0.5rem 0;
+            }
+
+            button {
+                width: 100%; /* Les boutons prendront toute la largeur disponible */
+                margin-top: 1rem;
+                padding: 0.5rem 1rem; /* Réduire un peu la hauteur du bouton */
+                font-size: 1rem; /* Réduire légèrement la taille de la police */
+            }
+
+            /* Espacer davantage les boutons dans le conteneur */
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+                gap: 1rem; /* Ajouter plus d'espace entre les boutons */
+            }
+
+            /* Ajuster les boutons 'Effacer' et 'Supprimer' pour plus de confort */
+            .delete-btn {
+                margin-top: 0.5rem;
+                padding: 0.4rem 0.8rem; /* Réduire le padding pour les boutons de suppression */
+            }
+        }
     </style>
 </head>
 <body>
     <header>
-        <h1>Test Firebase</h1>
+        <h1>Ventes</h1>
     </header>
+    <nav>
+        <a href="index.html">Accueil</a>
+        <a href="commandes.html">Commandes</a>
+        <a href="produits.html">Produits</a>
+    </nav>
     <main>
-        <p>Vérifiez la console pour voir les résultats du test Firebase.</p>
+        <h2>Liste des ventes</h2>
+        <div class="button-container">
+            <button id="clearData">Effacer toutes les données</button>
+        </div>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th data-sort="date">Date</th>
+                        <th data-sort="client">Client</th>
+                        <th data-sort="phone">Numéro de Téléphone</th>
+                        <th data-sort="product">Produit</th>
+                        <th data-sort="quantity">Quantité</th>
+                        <th data-sort="unitPrice">Prix Unitaire</th>
+                        <th data-sort="totalPrice">Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody id="salesTable">
+                    <!-- Contenu généré dynamiquement -->
+                </tbody>
+            </table>
+        </div>
     </main>
     <footer>
         <p>&copy; 2025 GLAD GYM NUTRITION. Tous droits réservés.</p>
     </footer>
 
     <!-- Inclusion des scripts Firebase -->
-    <script type="module">
-        // Importer les modules Firebase nécessaires
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
-        import { getDatabase, ref, set, get, child } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
-
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
+    <script>
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCBnNFvk5-VDdHGgmr-x32da41mIIijNY0",
@@ -59,38 +203,135 @@
             measurementId: "G-P4W3BNF3W4"
         };
 
-        // Initialisation de Firebase
-        const app = initializeApp(firebaseConfig);
-        const db = getDatabase(app);
+        // Initialisation Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-        // Fonction pour écrire des données
-        const writeTestData = () => {
-            set(ref(db, 'test/'), {
-                message: "Connexion Firebase réussie !"
-            }).then(() => {
-                console.log("Données écrites avec succès !");
-            }).catch((error) => {
-                console.error("Erreur lors de l'écriture :", error);
-            });
-        };
+        document.addEventListener('DOMContentLoaded', () => {
+            const salesTable = document.getElementById('salesTable');
+            const clearDataButton = document.getElementById('clearData');
 
-        // Fonction pour lire des données
-        const readTestData = () => {
-            const dbRef = ref(db);
-            get(child(dbRef, 'test/')).then((snapshot) => {
-                if (snapshot.exists()) {
-                    console.log("Données lues :", snapshot.val());
-                } else {
-                    console.log("Aucune donnée trouvée.");
+            // Fonction pour charger les ventes depuis Firebase
+            const loadOrders = () => {
+                const ordersRef = db.ref('sales');
+                return ordersRef.once('value').then((snapshot) => {
+                    const orders = snapshot.val();
+                    return orders ? Object.values(orders) : [];
+                });
+            };
+
+            // Fonction pour sauvegarder les commandes dans Firebase
+            const saveOrders = (orders) => {
+                const ordersRef = db.ref('sales');
+                ordersRef.set(orders);
+            };
+
+            // Fonction pour regrouper les commandes par date, client et téléphone
+            const groupOrders = (orders) => {
+                const groupedOrders = [];
+
+                orders.forEach(order => {
+                    const existingOrder = groupedOrders.find(o =>
+                        new Date(o.date).toLocaleDateString() === new Date(order.date).toLocaleDateString() &&
+                        o.client === order.client &&
+                        o.phone === order.phone
+                    );
+
+                    if (existingOrder) {
+                        const existingProduct = existingOrder.products.find(p => p.name === order.product);
+                        if (existingProduct) {
+                            existingProduct.quantity += order.quantity;
+                        } else {
+                            existingOrder.products.push({ name: order.product, quantity: order.quantity });
+                        }
+                        existingOrder.totalPrice += order.totalPrice;
+                    } else {
+                        groupedOrders.push({
+                            date: order.date,
+                            client: order.client,
+                            phone: order.phone,
+                            products: [{ name: order.product, quantity: order.quantity }],
+                            totalPrice: order.totalPrice
+                        });
+                    }
+                });
+
+                groupedOrders.forEach(order => {
+                    const productDetails = order.products.map(p => `${p.name} (${p.quantity})`).join(", ");
+                    order.product = productDetails;
+                    order.quantity = order.products.reduce((total, p) => total + p.quantity, 0);
+                });
+
+                return groupedOrders;
+            };
+
+            // Fonction pour afficher les commandes dans le tableau
+            const renderOrders = (orders) => {
+                salesTable.innerHTML = '';
+                orders.forEach((order, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${new Date(order.date).toLocaleDateString()}</td>
+                        <td>${order.client}</td>
+                        <td>${order.phone || 'Non renseigné'}</td>
+                        <td>${order.product}</td>
+                        <td>${order.quantity}</td>
+                        <td>${(order.totalPrice / order.quantity).toFixed(2)} FCFA</td>
+                        <td>${order.totalPrice} FCFA</td>
+                        <td><button class="delete-btn" data-index="${index}">Supprimer</button></td>
+                    `;
+                    salesTable.appendChild(row);
+                });
+
+                document.querySelectorAll('.delete-btn').forEach(btn => {
+                    btn.addEventListener('click', (event) => {
+                        const index = event.target.getAttribute('data-index');
+                        deleteOrder(index);
+                    });
+                });
+            };
+
+            // Fonction pour supprimer une commande
+            const deleteOrder = (index) => {
+                loadOrders().then((orders) => {
+                    orders.splice(index, 1);
+                    saveOrders(orders);
+                    renderOrders(groupOrders(orders));
+                });
+            };
+
+            // Fonction pour vider toutes les données
+            clearDataButton.addEventListener('click', () => {
+                if (confirm('Voulez-vous vraiment effacer toutes les données des ventes ?')) {
+                    db.ref('sales').remove();
+                    renderOrders([]);
                 }
-            }).catch((error) => {
-                console.error("Erreur lors de la lecture :", error);
             });
-        };
 
-        // Exécution des tests
-        writeTestData();
-        readTestData();
+            // Fonction de tri
+            const sortOrders = (orders, sortBy, isDescending) => {
+                return orders.sort((a, b) => {
+                    if (sortBy === 'date') {
+                        const dateA = new Date(a.date);
+                        const dateB = new Date(b.date);
+                        return isDescending ? dateB - dateA : dateA - dateB;
+                    }
+                    if (sortBy === 'quantity' || sortBy === 'totalPrice') {
+                        return isDescending ? b[sortBy] - a[sortBy] : a[sortBy] - b[sortBy];
+                    }
+                    if (sortBy === 'client' || sortBy === 'phone') {
+                        return isDescending ? b[sortBy].localeCompare(a[sortBy]) : a[sortBy].localeCompare(b[sortBy]);
+                    }
+                    return 0;
+                });
+            };
+
+            // Charger et afficher les commandes
+            loadOrders().then((orders) => {
+                const groupedOrders = groupOrders(orders);
+                renderOrders(groupedOrders);
+            });
+        });
     </script>
 </body>
 </html>
