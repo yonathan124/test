@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ventes Firebase</title>
+    <title>Test Firebase</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -14,19 +14,12 @@
         }
         header {
             background-color: #ff0000;
-            color: white;
             text-align: center;
             padding: 1rem 0;
-        }
-        footer {
-            background-color: black;
-            color: white;
-            text-align: center;
-            padding: 1rem 0;
-            margin-top: 2rem;
         }
         main {
             padding: 2rem;
+            text-align: center;
         }
     </style>
 </head>
@@ -35,14 +28,10 @@
         <h1>Test Firebase</h1>
     </header>
     <main>
-        <h2>Résultat du test Firebase</h2>
-        <p>Vérifiez la console pour les messages.</p>
+        <p>Vérifiez la console pour voir les résultats du test Firebase.</p>
     </main>
-    <footer>
-        <p>&copy; 2025 GLAD GYM NUTRITION. Tous droits réservés.</p>
-    </footer>
 
-    <!-- Scripts Firebase -->
+    <!-- Inclusion des scripts Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
     <script>
@@ -62,15 +51,11 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Test Firebase
+        // Test de lecture et écriture Firebase
         const writeTestData = () => {
-            db.ref('test/').set({
-                message: "Connexion Firebase réussie !"
-            }).then(() => {
-                console.log("Données écrites avec succès !");
-            }).catch((error) => {
-                console.error("Erreur lors de l'écriture :", error);
-            });
+            db.ref('test/').set({ message: "Connexion Firebase réussie !" })
+                .then(() => console.log("Données écrites avec succès !"))
+                .catch((error) => console.error("Erreur lors de l'écriture :", error));
         };
 
         const readTestData = () => {
@@ -82,12 +67,10 @@
                         console.log("Aucune donnée trouvée.");
                     }
                 })
-                .catch((error) => {
-                    console.error("Erreur lors de la lecture :", error);
-                });
+                .catch((error) => console.error("Erreur lors de la lecture :", error));
         };
 
-        // Exécuter les tests Firebase
+        // Exécution des tests Firebase
         writeTestData();
         readTestData();
     </script>
