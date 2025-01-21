@@ -42,9 +42,11 @@
     </footer>
 
     <!-- Inclusion des scripts Firebase -->
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
-    <script>
+    <script type="module">
+        // Importer les modules Firebase nécessaires
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js';
+        import { getDatabase, ref, set, get, child } from 'https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js';
+
         // Configuration Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyCBnNFvk5-VDdHGgmr-x32da41mIIijNY0",
@@ -57,13 +59,13 @@
             measurementId: "G-P4W3BNF3W4"
         };
 
-        // Initialisation Firebase
-        const app = firebase.initializeApp(firebaseConfig);
-        const db = firebase.database();
+        // Initialisation de Firebase
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
 
-        // Test de Firebase
+        // Fonction pour écrire des données
         const writeTestData = () => {
-            db.ref('test/').set({
+            set(ref(db, 'test/'), {
                 message: "Connexion Firebase réussie !"
             }).then(() => {
                 console.log("Données écrites avec succès !");
@@ -72,18 +74,18 @@
             });
         };
 
+        // Fonction pour lire des données
         const readTestData = () => {
-            db.ref('test/').once('value')
-                .then((snapshot) => {
-                    if (snapshot.exists()) {
-                        console.log("Données lues :", snapshot.val());
-                    } else {
-                        console.log("Aucune donnée trouvée.");
-                    }
-                })
-                .catch((error) => {
-                    console.error("Erreur lors de la lecture :", error);
-                });
+            const dbRef = ref(db);
+            get(child(dbRef, 'test/')).then((snapshot) => {
+                if (snapshot.exists()) {
+                    console.log("Données lues :", snapshot.val());
+                } else {
+                    console.log("Aucune donnée trouvée.");
+                }
+            }).catch((error) => {
+                console.error("Erreur lors de la lecture :", error);
+            });
         };
 
         // Exécution des tests
