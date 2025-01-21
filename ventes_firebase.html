@@ -21,6 +21,13 @@
             padding: 2rem;
             text-align: center;
         }
+        footer {
+            background-color: black;
+            color: white;
+            text-align: center;
+            padding: 1rem 0;
+            margin-top: 2rem;
+        }
     </style>
 </head>
 <body>
@@ -30,6 +37,9 @@
     <main>
         <p>Vérifiez la console pour voir les résultats du test Firebase.</p>
     </main>
+    <footer>
+        <p>&copy; 2025 GLAD GYM NUTRITION. Tous droits réservés.</p>
+    </footer>
 
     <!-- Inclusion des scripts Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
@@ -51,11 +61,15 @@
         const app = firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Test de lecture et écriture Firebase
+        // Test de Firebase
         const writeTestData = () => {
-            db.ref('test/').set({ message: "Connexion Firebase réussie !" })
-                .then(() => console.log("Données écrites avec succès !"))
-                .catch((error) => console.error("Erreur lors de l'écriture :", error));
+            db.ref('test/').set({
+                message: "Connexion Firebase réussie !"
+            }).then(() => {
+                console.log("Données écrites avec succès !");
+            }).catch((error) => {
+                console.error("Erreur lors de l'écriture :", error);
+            });
         };
 
         const readTestData = () => {
@@ -67,10 +81,12 @@
                         console.log("Aucune donnée trouvée.");
                     }
                 })
-                .catch((error) => console.error("Erreur lors de la lecture :", error));
+                .catch((error) => {
+                    console.error("Erreur lors de la lecture :", error);
+                });
         };
 
-        // Exécution des tests Firebase
+        // Exécution des tests
         writeTestData();
         readTestData();
     </script>
