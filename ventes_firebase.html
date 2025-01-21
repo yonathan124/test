@@ -12,37 +12,12 @@
             background-color: #333;
             color: #fff;
         }
-
         header {
             background-color: #ff0000;
             color: white;
             text-align: center;
             padding: 1rem 0;
         }
-
-        nav {
-            background-color: black;
-            padding: 0.5rem;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        nav a {
-            color: white;
-            margin: 0 1.5rem;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 0.5rem 1rem;
-            transition: background-color 0.3s ease;
-        }
-
-        nav a:hover {
-            text-decoration: underline;
-            background-color: #ff4444;
-        }
-
         footer {
             background-color: black;
             color: white;
@@ -50,141 +25,24 @@
             padding: 1rem 0;
             margin-top: 2rem;
         }
-
         main {
             padding: 2rem;
-        }
-
-        h2 {
-            margin-bottom: 1rem;
-        }
-
-        .button-container {
-            display: flex;
-            justify-content: center;
-            gap: 1.5rem;
-            margin-bottom: 1rem;
-            flex-wrap: wrap;
-        }
-
-        button {
-            padding: 0.5rem 1rem;
-            background-color: #ff0000;
-            color: white;
-            border: none;
-            cursor: pointer;
-            text-align: center;
-            font-weight: bold;
-            width: 200px;
-            max-width: 100%;
-        }
-
-        button:hover {
-            background-color: #cc0000;
-        }
-
-        .delete-btn {
-            background-color: #cc0000;
-            color: white;
-            border: none;
-            cursor: pointer;
-            padding: 0.3rem 0.5rem;
-        }
-
-        .delete-btn:hover {
-            background-color: #990000;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1rem;
-            overflow-x: auto;
-        }
-
-        table, th, td {
-            border: 1px solid #ccc;
-        }
-
-        th, td {
-            padding: 0.5rem;
-            text-align: left;
-        }
-
-        th {
-            cursor: pointer;
-            background-color: #444;
-        }
-
-        .table-container {
-            overflow-x: auto;
-        }
-
-        @media (max-width: 768px) {
-            nav a {
-                display: block;
-                margin: 0.5rem 0;
-            }
-
-            button {
-                width: 100%;
-                margin-top: 1rem;
-                padding: 0.5rem 1rem;
-                font-size: 1rem;
-            }
-
-            .button-container {
-                flex-direction: column;
-                align-items: center;
-                gap: 1rem;
-            }
-
-            .delete-btn {
-                margin-top: 0.5rem;
-                padding: 0.4rem 0.8rem;
-            }
         }
     </style>
 </head>
 <body>
     <header>
-        <h1>Ventes</h1>
+        <h1>Test Firebase</h1>
     </header>
-    <nav>
-        <a href="index.html">Accueil</a>
-        <a href="commandes.html">Commandes</a>
-        <a href="produits.html">Produits</a>
-    </nav>
     <main>
-        <h2>Liste des ventes</h2>
-        <div class="button-container">
-            <button id="clearData">Effacer toutes les données</button>
-        </div>
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th data-sort="date">Date</th>
-                        <th data-sort="client">Client</th>
-                        <th data-sort="phone">Numéro de Téléphone</th>
-                        <th data-sort="product">Produit</th>
-                        <th data-sort="quantity">Quantité</th>
-                        <th data-sort="unitPrice">Prix Unitaire</th>
-                        <th data-sort="totalPrice">Total</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
-                <tbody id="salesTable">
-                    <!-- Contenu généré dynamiquement -->
-                </tbody>
-            </table>
-        </div>
+        <h2>Résultat du test Firebase</h2>
+        <p>Vérifiez la console pour les messages.</p>
     </main>
     <footer>
         <p>&copy; 2025 GLAD GYM NUTRITION. Tous droits réservés.</p>
     </footer>
 
-    <!-- Intégration Firebase -->
+    <!-- Scripts Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.17.1/firebase-database.js"></script>
     <script>
@@ -232,103 +90,6 @@
         // Exécuter les tests Firebase
         writeTestData();
         readTestData();
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const salesTable = document.getElementById('salesTable');
-            const clearDataButton = document.getElementById('clearData');
-
-            const loadOrders = async () => {
-                const snapshot = await db.ref('orders').once('value');
-                return snapshot.val() ? Object.values(snapshot.val()) : [];
-            };
-
-            const saveOrders = async (orders) => {
-                await db.ref('orders').set(orders);
-            };
-
-            const groupOrders = (orders) => {
-                const groupedOrders = [];
-                orders.forEach(order => {
-                    const existingOrder = groupedOrders.find(o =>
-                        new Date(o.date).toLocaleDateString() === new Date(order.date).toLocaleDateString() &&
-                        o.client === order.client &&
-                        o.phone === order.phone
-                    );
-
-                    if (existingOrder) {
-                        const existingProduct = existingOrder.products.find(p => p.name === order.product);
-                        if (existingProduct) {
-                            existingProduct.quantity += order.quantity;
-                        } else {
-                            existingOrder.products.push({ name: order.product, quantity: order.quantity });
-                        }
-                        existingOrder.totalPrice += order.totalPrice;
-                    } else {
-                        groupedOrders.push({
-                            date: order.date,
-                            client: order.client,
-                            phone: order.phone,
-                            products: [{ name: order.product, quantity: order.quantity }],
-                            totalPrice: order.totalPrice
-                        });
-                    }
-                });
-
-                groupedOrders.forEach(order => {
-                    const productDetails = order.products.map(p => `${p.name} (${p.quantity})`).join(", ");
-                    order.product = productDetails;
-                    order.quantity = order.products.reduce((total, p) => total + p.quantity, 0);
-                });
-
-                return groupedOrders;
-            };
-
-            const renderOrders = (orders) => {
-                salesTable.innerHTML = '';
-                orders.forEach((order, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${new Date(order.date).toLocaleDateString()}</td>
-                        <td>${order.client}</td>
-                        <td>${order.phone || 'Non renseigné'}</td>
-                        <td>${order.product}</td>
-                        <td>${order.quantity}</td>
-                        <td>${(order.totalPrice / order.quantity).toFixed(2)} FCFA</td>
-                        <td>${order.totalPrice} FCFA</td>
-                        <td><button class="delete-btn" data-index="${index}">Supprimer</button></td>
-                    `;
-                    salesTable.appendChild(row);
-                });
-
-                document.querySelectorAll('.delete-btn').forEach(btn => {
-                    btn.addEventListener('click', (event) => {
-                        const index = event.target.getAttribute('data-index');
-                        deleteOrder(index);
-                    });
-                });
-            };
-
-            const deleteOrder = async (index) => {
-                const orders = await loadOrders();
-                orders.splice(index, 1);
-                await saveOrders(orders);
-                renderOrders(groupOrders(orders));
-            };
-
-            clearDataButton.addEventListener('click', async () => {
-                if (confirm('Voulez-vous vraiment effacer toutes les données des ventes ?')) {
-                    await db.ref('orders').remove();
-                    renderOrders([]);
-                }
-            });
-
-            const initialize = async () => {
-                const orders = await loadOrders();
-                renderOrders(groupOrders(orders));
-            };
-
-            initialize();
-        });
     </script>
 </body>
 </html>
